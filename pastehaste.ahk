@@ -2,11 +2,14 @@
 SendMode Input
 SetWorkingDir %A_ScriptDir%
 
+Gui +AlwaysOnTop
 Gui, Color, 282828, 707070
 Gui, Font, s12 cWhite, Verdana ; Set the font size to 12 and color to white, and the font to Verdana
 
 Gui, Add, Text, x10 y10 cFFFFFF, Enabled
 Gui, Add, CheckBox, x80 y10 vPasteMode cFFFFFF Checked
+
+Gui, Add, Button, x200 y10 w80 h20 gSaveInputs, Save
 
 Gui, Add, Text, x10 y40 cFFFFFF, Key 1:
 Gui, Add, Edit, x80 y40 vKey1Input w200 cFFFFFF
@@ -19,18 +22,14 @@ Gui, Add, Edit, x80 y145 vKey4Input w200 cFFFFFF
 Gui, Add, Text, x10 y180 cFFFFFF, Key 5:
 Gui, Add, Edit, x80 y180 vKey5Input w200 cFFFFFF
 
-SaveInputs() {
-    Gui, Submit, NoHide
-    FileDelete, %A_ScriptDir%\key_inputs.txt
-    FileAppend, Key 1: %Key1Input%`nKey 2: %Key2Input%`nKey 3: %Key3Input%`nKey 4: %Key4Input%`nKey 5: %Key5Input%`n, %A_ScriptDir%\key_inputs.txt
-}
-
 Gui, Show,, Paste Haste
 LoadKeyInputs()
 Return
+SetKeyDelay, 50, 50
 
 !1::
     if (PasteModeChecked())
+        KeyWait, Alt, 1
     {
         Gui, Submit, NoHide
         SendInput %Key1Input%
@@ -40,6 +39,7 @@ Return
 !2::
     if (PasteModeChecked())
     {
+        KeyWait, Alt, 2
         Gui, Submit, NoHide
         SendInput %Key2Input%
     }
@@ -48,6 +48,7 @@ Return
 !3::
     if (PasteModeChecked())
     {
+        KeyWait, Alt, 3
         Gui, Submit, NoHide
         SendInput %Key3Input%
     }
@@ -56,6 +57,7 @@ Return
 !4::
     if (PasteModeChecked())
     {
+        KeyWait, Alt, 4
         Gui, Submit, NoHide
         SendInput %Key4Input%
     }
@@ -64,6 +66,7 @@ Return
 !5::
     if (PasteModeChecked())
     {
+        KeyWait, Alt, 5
         Gui, Submit, NoHide
         SendInput %Key5Input%
     }
@@ -90,6 +93,7 @@ Return
 Return
 
 !w::
+    KeyWait, Alt, w
     if (PasteModeChecked()) {
 
         WinGetTitle, activeTitle, A
@@ -99,7 +103,7 @@ Return
             ; MsgBox, Found email in window title: %emailMatch%
             SendInput %emailMatch%
         } else {
-            TrayTip, No email found in window title, Did you try suckin on it?
+            ; TrayTip, No email found in window title, :(
         }
     }
 
@@ -107,12 +111,13 @@ Return
 
 !e::
     if (PasteModeChecked()) {
+        KeyWait, Alt, e
         WinGetTitle, activeTitle, A
         RegExMatch(activeTitle, "i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", emailMatch)
 
         if (!emailMatch)
         {
-            TrayTip, No email found in window title, Did you try suckin on it?
+            ; TrayTip, No email found in window title, :(
             Return
         }
 
@@ -121,8 +126,8 @@ Return
         Loop, Parse, accounts, `n ; Loop through each line of the file
         {
             account := StrSplit(A_LoopField, ",")
-            username := account[2]
-            password := account[3]
+            username := account[1]
+            password := account[2]
 
             if (username = emailMatch)
             {
@@ -131,8 +136,8 @@ Return
             }
         }
 
-        TrayTip, No account found for email %emailMatch%, Did you try suckin on it?
-        }
+        ; TrayTip, No account found for email %emailMatch%, :(
+    }
 Return
 
 CopyToClipboardAndSetGuiControl(controlName)
@@ -148,12 +153,27 @@ CopyToClipboardAndSetGuiControl(controlName)
 PasteModeChecked()
 {
     GuiControlGet, PasteMode
-return PasteMode
+Return PasteMode
 }
 
-GuiClose:
-    SaveInputs()
-ExitApp
+SaveInputs()
+{
+    global
+    Gui, Submit, NoHide
+    if (FileExist("key_inputs.txt")) {
+        FileDelete, %A_ScriptDir%\key_inputs.txt
+        if (ErrorLevel) {
+            MsgBox, Failed to delete key inputs file
+            Return
+        }
+    }
+
+    FileAppend, Key 1: %Key1Input%`nKey 2: %Key2Input%`nKey 3: %Key3Input%`nKey 4: %Key4Input%`nKey 5: %Key5Input%`n, %A_ScriptDir%\key_inputs.txt
+    if (ErrorLevel) {
+        MsgBox, Failed to save key inputs to file
+        Return
+    }
+}
 
 LoadKeyInputs()
 {
@@ -180,3 +200,6 @@ LoadKeyInputs()
             GuiControl,, Key5Input, %Key5Input%
         }
     }
+
+    GuiClose:
+    ExitApp
