@@ -11,19 +11,20 @@ Gui, Add, CheckBox, x80 y10 vPasteMode cFFFFFF Checked
 
 Gui, Add, Button, x200 y10 w80 h20 gSaveInputs, Save
 
-Gui, Add, Text, x10 y40 cFFFFFF, Key 1:
+Gui, Add, Text, x10 y40 cFFFFFF, Alt 1:
 Gui, Add, Edit, x80 y40 vKey1Input w200 cFFFFFF
-Gui, Add, Text, x10 y75 cFFFFFF, Key 2:
+Gui, Add, Text, x10 y75 cFFFFFF, Alt 2:
 Gui, Add, Edit, x80 y75 vKey2Input w200 cFFFFFF
-Gui, Add, Text, x10 y110 cFFFFFF, Key 3:
+Gui, Add, Text, x10 y110 cFFFFFF, Alt 3:
 Gui, Add, Edit, x80 y110 vKey3Input w200 cFFFFFF
-Gui, Add, Text, x10 y145 cFFFFFF, Key 4:
+Gui, Add, Text, x10 y145 cFFFFFF, Alt 4:
 Gui, Add, Edit, x80 y145 vKey4Input w200 cFFFFFF
-Gui, Add, Text, x10 y180 cFFFFFF, Key 5:
+Gui, Add, Text, x10 y180 cFFFFFF, Alt 5:
 Gui, Add, Edit, x80 y180 vKey5Input w200 cFFFFFF
 
 Gui, Show,, Paste Haste
 LoadKeyInputs()
+FileRead, accounts, accounts.txt
 Return
 SetKeyDelay, 50, 50
 
@@ -95,15 +96,11 @@ Return
 !w::
     KeyWait, Alt, w
     if (PasteModeChecked()) {
-
-        WinGetTitle, activeTitle, A
-        RegExMatch(activeTitle, "i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", emailMatch)
+        KeyWait, Alt, w
+        emailMatch := FetchWindowTitleEmail()
         if (emailMatch)
         {
-            ; MsgBox, Found email in window title: %emailMatch%
             SendInput %emailMatch%
-        } else {
-            ; TrayTip, No email found in window title, :(
         }
     }
 
@@ -112,18 +109,13 @@ Return
 !e::
     if (PasteModeChecked()) {
         KeyWait, Alt, e
-        WinGetTitle, activeTitle, A
-        RegExMatch(activeTitle, "i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", emailMatch)
+        emailMatch := FetchWindowTitleEmail()
 
-        if (!emailMatch)
-        {
-            ; TrayTip, No email found in window title, :(
+        if (!emailMatch) {
             Return
         }
 
-        FileRead, accounts, accounts.txt
-
-        Loop, Parse, accounts, `n ; Loop through each line of the file
+        Loop, Parse, accounts, `n
         {
             account := StrSplit(A_LoopField, ",")
             username := account[1]
@@ -135,8 +127,44 @@ Return
                 Return
             }
         }
+    }
+Return
 
-        ; TrayTip, No account found for email %emailMatch%, :(
+!s::
+    if (PasteModeChecked()) {
+        KeyWait, Alt, s
+        emailMatch := FetchWindowTitleEmail()
+
+        if (!emailMatch) {
+            Return
+        }
+
+        Loop, Parse, accounts, `n
+        {
+            account := StrSplit(A_LoopField, ",")
+            username := account[1]
+            username := StrReplace(username, "`n", "")
+            username := StrReplace(username, "`r", "")
+            pw := account[2]
+            pw := StrReplace(pw, "`n", "")
+            pw := StrReplace(pw, "`r", "")
+
+            if (username = emailMatch)
+            {
+                ClipBoard := ""
+                Send, ^c
+                ClipWait, 2
+                if ErrorLevel {
+                    MsgBox, The attempt to copy text onto the clipboard failed.
+                    return
+                }
+                copyText := Clipboard
+                copyText := StrReplace(copyText, "`n", "")
+                copyText := StrReplace(copyText, "`r", "")
+                Clipboard := username . " " . pw . " " . copyText . "`n"
+                Break
+            }
+        }
     }
 Return
 
@@ -148,6 +176,13 @@ CopyToClipboardAndSetGuiControl(controlName)
     {
         GuiControl,, %controlName%, %ClipBoard%
     }
+}
+
+FetchWindowTitleEmail()
+{
+    WinGetTitle, activeTitle, A
+    RegExMatch(activeTitle, "i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", emailMatch)
+return emailMatch
 }
 
 PasteModeChecked()
