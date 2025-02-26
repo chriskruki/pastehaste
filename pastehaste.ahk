@@ -21,6 +21,16 @@ Gui, Add, Text, x10 y145 cFFFFFF, Alt 4:
 Gui, Add, Edit, x80 y145 vKey4Input w200 cFFFFFF
 Gui, Add, Text, x10 y180 cFFFFFF, Alt 5:
 Gui, Add, Edit, x80 y180 vKey5Input w200 cFFFFFF
+Gui, Add, Text, x10 y215 cFFFFFF, Alt Q:
+Gui, Add, Edit, x80 y215 vKey6Input w200 cFFFFFF
+Gui, Add, Text, x10 y250 cFFFFFF, Alt W:
+Gui, Add, Edit, x80 y250 vKey7Input w200 cFFFFFF
+Gui, Add, Text, x10 y285 cFFFFFF, Alt E:
+Gui, Add, Edit, x80 y285 vKey8Input w200 cFFFFFF
+Gui, Add, Text, x10 y320 cFFFFFF, Alt R:
+Gui, Add, Edit, x80 y320 vKey9Input w200 cFFFFFF
+Gui, Add, Text, x10 y355 cFFFFFF, Alt T:
+Gui, Add, Edit, x80 y355 vKey10Input w200 cFFFFFF
 
 Gui, Show,, Paste Haste
 LoadKeyInputs()
@@ -93,6 +103,63 @@ Return
     CopyToClipboardAndSetGuiControl("Key5Input")
 Return
 
+; Paste Mode
+; !q::
+;     if (PasteModeChecked())
+;     {
+;         KeyWait, Alt, q
+;         Gui, Submit, NoHide
+;         SendInput %Key6Input%
+;     }
+; Return
+; !w::
+;     if (PasteModeChecked())
+;     {
+;         KeyWait, Alt,
+;         Gui, Submit, NoHide
+;         SendInput %Key7Input%
+;     }
+; Return
+; !e::
+;     if (PasteModeChecked())
+;     {
+;         KeyWait, Alt, e
+;         Gui, Submit, NoHide
+;         SendInput %Key8Input%
+;     }
+; Return
+; !r::
+;     if (PasteModeChecked())
+;     {
+;         KeyWait, Alt, r
+;         Gui, Submit, NoHide
+;         SendInput %Key9Input%
+;     }
+; Return
+; !t::
+;     if (PasteModeChecked())
+;     {
+;         KeyWait, Alt, t
+;         Gui, Submit, NoHide
+;         SendInput %Key10Input%
+;     }
+; Return
+; ^!q::
+;     CopyToClipboardAndSetGuiControl("Key6Input")
+; Return
+; ^!w::
+;     CopyToClipboardAndSetGuiControl("Key7Input")
+; Return
+; ^!e::
+;     CopyToClipboardAndSetGuiControl("Key8Input")
+; Return
+; ^!r::
+;     CopyToClipboardAndSetGuiControl("Key9Input")
+; Return
+; ^!t::
+;     CopyToClipboardAndSetGuiControl("Key10Input")
+; Return
+
 !w::
     KeyWait, Alt, w
     if (PasteModeChecked()) {
@@ -136,7 +203,8 @@ Return
         emailMatch := FetchWindowTitleEmail()
 
         if (!emailMatch) {
-            Return
+            MsgBox, No email found in window title
+            return
         }
 
         Loop, Parse, accounts, `n
@@ -159,10 +227,12 @@ Return
                     return
                 }
                 copyText := Clipboard
-                copyText := StrReplace(copyText, "`n", "")
-                copyText := StrReplace(copyText, "`r", "")
-                Clipboard := username . " " . pw . " " . copyText . "`n"
+                ; copyText := StrReplace(copyText, "`n", "")
+                ; copyText := StrReplace(copyText, "`r", "")
+                Clipboard := username . " " . pw . "`n" . copyText . "`n"
                 Break
+            } else {
+                ; MsgBox, No account found for email: %emailMatch%
             }
         }
     }
@@ -170,25 +240,35 @@ Return
 
 CopyToClipboardAndSetGuiControl(controlName)
 {
+    KeyWait, Alt, Ctrl
     Send, ^c
-    ClipWait, 1
+    Sleep, 100
+    ClipWait, 3
+    newClip := Clipboard
     if (!ErrorLevel) ; If text was successfully copied to the clipboard
     {
-        GuiControl,, %controlName%, %ClipBoard%
+        GuiControl,, %controlName%, %newClip%
     }
 }
 
 FetchWindowTitleEmail()
 {
     WinGetTitle, activeTitle, A
-    RegExMatch(activeTitle, "i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", emailMatch)
-return emailMatch
+    ; RegExMatch(activeTitle, "i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", emailMatch)
+    RegExMatch(activeTitle, "^[^\s|]+", emailMatch)
+    return emailMatch
 }
 
 PasteModeChecked()
 {
     GuiControlGet, PasteMode
-Return PasteMode
+    Return PasteMode
+}
+
+TopRowChecked()
+{
+    GuiControlGet, TopPaste
+    Return TopPaste
 }
 
 SaveInputs()
@@ -227,14 +307,14 @@ LoadKeyInputs()
                 Key4Input := SubStr(A_LoopReadLine, 8)
             IfInString, A_LoopReadLine, Key 5:
                 Key5Input := SubStr(A_LoopReadLine, 8)
-            }
-            GuiControl,, Key1Input, %Key1Input%
-            GuiControl,, Key2Input, %Key2Input%
-            GuiControl,, Key3Input, %Key3Input%
-            GuiControl,, Key4Input, %Key4Input%
-            GuiControl,, Key5Input, %Key5Input%
         }
+        GuiControl,, Key1Input, %Key1Input%
+        GuiControl,, Key2Input, %Key2Input%
+        GuiControl,, Key3Input, %Key3Input%
+        GuiControl,, Key4Input, %Key4Input%
+        GuiControl,, Key5Input, %Key5Input%
     }
+}
 
-    GuiClose:
-    ExitApp
+GuiClose:
+ExitApp
