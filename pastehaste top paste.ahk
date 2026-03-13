@@ -104,140 +104,136 @@ Return
 Return
 
 ; Paste Mode
-; !q::
-;     if (PasteModeChecked())
-;     {
-;         KeyWait, Alt, q
-;         Gui, Submit, NoHide
-;         SendInput %Key6Input%
-;     }
-; Return
-; !w::
-;     if (PasteModeChecked())
-;     {
-;         KeyWait, Alt,
-;         Gui, Submit, NoHide
-;         SendInput %Key7Input%
-;     }
-; Return
-; !e::
-;     if (PasteModeChecked())
-;     {
-;         KeyWait, Alt, e
-;         Gui, Submit, NoHide
-;         SendInput %Key8Input%
-;     }
-; Return
-; !r::
-;     if (PasteModeChecked())
-;     {
-;         KeyWait, Alt, r
-;         Gui, Submit, NoHide
-;         SendInput %Key9Input%
-;     }
-; Return
-; !t::
-;     if (PasteModeChecked())
-;     {
-;         KeyWait, Alt, t
-;         Gui, Submit, NoHide
-;         SendInput %Key10Input%
-;     }
-; Return
-; ^!q::
-;     CopyToClipboardAndSetGuiControl("Key6Input")
-; Return
-; ^!w::
-;     CopyToClipboardAndSetGuiControl("Key7Input")
-; Return
-; ^!e::
-;     CopyToClipboardAndSetGuiControl("Key8Input")
-; Return
-; ^!r::
-;     CopyToClipboardAndSetGuiControl("Key9Input")
-; Return
-; ^!t::
-;     CopyToClipboardAndSetGuiControl("Key10Input")
-; Return
-
+!q::
+    if (PasteModeChecked())
+    {
+        KeyWait, Alt, q
+        Gui, Submit, NoHide
+        SendInput %Key6Input%
+    }
+Return
 !w::
-    KeyWait, Alt, w
-    if (PasteModeChecked()) {
-        KeyWait, Alt, w
-        emailMatch := FetchWindowTitleEmail()
-        if (emailMatch)
-        {
-            SendInput %emailMatch%
-        }
+    if (PasteModeChecked())
+    {
+        KeyWait, Alt, 
+        Gui, Submit, NoHide
+        SendInput %Key7Input%
     }
-
 Return
-
 !e::
-    if (PasteModeChecked()) {
+    if (PasteModeChecked())
+    {
         KeyWait, Alt, e
-        emailMatch := FetchWindowTitleEmail()
-
-        if (!emailMatch) {
-            Return
-        }
-
-        Loop, Parse, accounts, `n
-        {
-            account := StrSplit(A_LoopField, ",")
-            username := account[1]
-            password := account[2]
-
-            if (username = emailMatch)
-            {
-                SendInput %password%
-                Return
-            }
-        }
+        Gui, Submit, NoHide
+        SendInput %Key8Input%
     }
 Return
-; On press Alt + S, copy the email and password to clipboard
-!s::
-    if (PasteModeChecked()) {
-        KeyWait, Alt, s
-        emailMatch := FetchWindowTitleEmail()
-
-        if (!emailMatch) {
-            MsgBox, No email found in window title
-            return
-        }
-
-        Loop, Parse, accounts, `n
-        {
-            account := StrSplit(A_LoopField, ",")
-            username := account[1]
-            username := StrReplace(username, "`n", "")
-            username := StrReplace(username, "`r", "")
-            pw := account[2]
-            pw := StrReplace(pw, "`n", "")
-            pw := StrReplace(pw, "`r", "")
-
-            if (username = emailMatch)
-            {
-                ; MsgBox, Account found for email: %emailMatch%`nUsername: %username%`nPassword: %pw%
-                ClipBoard := ""
-                Send, ^c
-                ClipWait, 2
-                if ErrorLevel {
-                    MsgBox, The attempt to copy text onto the clipboard failed.
-                    return
-                }
-                copyText := Clipboard
-                ; copyText := StrReplace(copyText, "`n", "")
-                ; copyText := StrReplace(copyText, "`r", "")
-                Clipboard := username . " " . pw . "`n" . copyText . "`n"
-                Break
-            } else {
-                ; MsgBox, No account found for email: %emailMatch%
-            }
-        }
+!r::
+    if (PasteModeChecked())
+    {
+        KeyWait, Alt, r
+        Gui, Submit, NoHide
+        SendInput %Key9Input%
     }
 Return
+!t::
+    if (PasteModeChecked())
+    {
+        KeyWait, Alt, t
+        Gui, Submit, NoHide
+        SendInput %Key10Input%
+    }
+Return
+^!q::
+    CopyToClipboardAndSetGuiControl("Key6Input")
+Return
+^!w::
+    CopyToClipboardAndSetGuiControl("Key7Input")
+Return
+^!e::
+    CopyToClipboardAndSetGuiControl("Key8Input")
+Return
+^!r::
+    CopyToClipboardAndSetGuiControl("Key9Input")
+Return
+^!t::
+    CopyToClipboardAndSetGuiControl("Key10Input")
+Return
+
+; !w::
+;     KeyWait, Alt, w
+;     if (PasteModeChecked()) {
+;         KeyWait, Alt, w
+;         emailMatch := FetchWindowTitleEmail()
+;         if (emailMatch)
+;         {
+;             SendInput %emailMatch%
+;         }
+;     }
+
+; Return
+
+; !e::
+;     if (PasteModeChecked()) {
+;         KeyWait, Alt, e
+;         emailMatch := FetchWindowTitleEmail()
+
+;         if (!emailMatch) {
+;             Return
+;         }
+
+;         Loop, Parse, accounts, `n
+;         {
+;             account := StrSplit(A_LoopField, ",")
+;             username := account[1]
+;             password := account[2]
+
+;             if (username = emailMatch)
+;             {
+;                 SendInput %password%
+;                 Return
+;             }
+;         }
+;     }
+; Return
+
+; !s::
+;     if (PasteModeChecked()) {
+;         KeyWait, Alt, s
+;         emailMatch := FetchWindowTitleEmail()
+
+;         if (!emailMatch) {
+;             Return
+;         }
+
+;         Loop, Parse, accounts, `n
+;         {
+;             account := StrSplit(A_LoopField, ",")
+;             username := account[1]
+;             username := StrReplace(username, "`n", "")
+;             username := StrReplace(username, "`r", "")
+;             pw := account[2]
+;             pw := StrReplace(pw, "`n", "")
+;             pw := StrReplace(pw, "`r", "")
+
+;             if (username = emailMatch)
+;             {
+;                 ClipBoard := ""
+;                 Send, ^c
+;                 ClipWait, 2
+;                 if ErrorLevel {
+;                     MsgBox, The attempt to copy text onto the clipboard failed.
+;                     return
+;                 }
+;                 copyText := Clipboard
+;                 copyText := StrReplace(copyText, "`n", "")
+;                 copyText := StrReplace(copyText, "`r", "")
+;                 Clipboard := username . " " . pw . " " . copyText . "`n"
+;                 Break
+;             }
+;         }
+;     }
+; Return
 
 CopyToClipboardAndSetGuiControl(controlName)
 {
@@ -255,22 +251,22 @@ CopyToClipboardAndSetGuiControl(controlName)
 FetchWindowTitleEmail()
 {
     WinGetTitle, activeTitle, A
-    ; RegExMatch(activeTitle, "i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", emailMatch)
-    RegExMatch(activeTitle, "^[^\s|]+", emailMatch)
-    return emailMatch
+    RegExMatch(activeTitle, "i)\b[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}\b", emailMatch)
+return emailMatch
 }
 
 PasteModeChecked()
 {
     GuiControlGet, PasteMode
-    Return PasteMode
+Return PasteMode
 }
 
 TopRowChecked()
 {
     GuiControlGet, TopPaste
-    Return TopPaste
+Return TopPaste
 }
+
 
 SaveInputs()
 {
@@ -308,14 +304,14 @@ LoadKeyInputs()
                 Key4Input := SubStr(A_LoopReadLine, 8)
             IfInString, A_LoopReadLine, Key 5:
                 Key5Input := SubStr(A_LoopReadLine, 8)
+            }
+            GuiControl,, Key1Input, %Key1Input%
+            GuiControl,, Key2Input, %Key2Input%
+            GuiControl,, Key3Input, %Key3Input%
+            GuiControl,, Key4Input, %Key4Input%
+            GuiControl,, Key5Input, %Key5Input%
         }
-        GuiControl,, Key1Input, %Key1Input%
-        GuiControl,, Key2Input, %Key2Input%
-        GuiControl,, Key3Input, %Key3Input%
-        GuiControl,, Key4Input, %Key4Input%
-        GuiControl,, Key5Input, %Key5Input%
     }
-}
 
-GuiClose:
-ExitApp
+    GuiClose:
+    ExitApp
