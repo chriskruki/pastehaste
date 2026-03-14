@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>PasteHaste</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="header">
+    <h1>PasteHaste</h1>
+    <label class="toggle">
+      <input type="checkbox" id="enableToggle" checked />
+      <span class="toggle-label">Enabled</span>
+    </label>
+  </div>
+
+  <div class="keybind-header">
+    <span class="col-paste">Paste</span>
+    <span class="col-copy">Copy</span>
+  </div>
+
+  <div id="slots"></div>
+
+  <div class="section-divider">
+    <span>Random CA Address</span>
+    <button id="newAddrBtn" title="Generate new random address">New</button>
+  </div>
+
+  <div id="address-section"></div>
+
+  <div class="footer">
+    <button id="saveBtn">Save</button>
+  </div>
+
+  <script src="main.js"></script>
+</body>
+</html>

@@ -1,2 +1,5 @@
 accounts.txt
 key_inputs.txt
+node_modules/
+src-tauri/target/
+dist/
