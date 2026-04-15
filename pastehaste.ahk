@@ -5,7 +5,6 @@ SendMode "Input"
 SetWorkingDir A_ScriptDir
 SetKeyDelay 50, 50
 
-accounts := ""
 currentStreet := ""
 currentCity := ""
 currentZip := ""
@@ -152,104 +151,87 @@ myGui := Gui("+AlwaysOnTop")
 myGui.BackColor := "282828"
 myGui.SetFont("s12 cWhite", "Verdana")
 
-myGui.Add("Text", "x10 y10 cFFFFFF", "Enabled")
-myGui.Add("CheckBox", "x80 y10 vPasteMode cFFFFFF Checked")
+myGui.Add("Button", "x270 y5 w25 h25", "?").OnEvent("Click", ToggleHelp)
 
-myGui.Add("Button", "x200 y10 w80 h20", "Save").OnEvent("Click", SaveInputs)
+slotAutoTabCtrl := myGui.Add("CheckBox", "x10 y10 vSlotAutoTab cFFFFFF Checked", "Auto Tab")
+slotAutoTabCtrl.ToolTip := "Alt+1 pastes slots 1-4 separated by Tab"
 
-myGui.Add("CheckBox", "x10 y38 vSlotAutoTab cFFFFFF", "Auto Tab")
+myGui.Add("Text", "x10 y35 c808080 w270", "Ctrl+Alt+`` to copy all")
 
-myGui.Add("Text", "x10 y65 cFFFFFF", "Alt 1:")
-myGui.Add("Edit", "x80 y65 vKey1Input w200 cFFFFFF")
-myGui.Add("Text", "x10 y100 cFFFFFF", "Alt 2:")
-myGui.Add("Edit", "x80 y100 vKey2Input w200 cFFFFFF")
-myGui.Add("Text", "x10 y135 cFFFFFF", "Alt 3:")
-myGui.Add("Edit", "x80 y135 vKey3Input w200 cFFFFFF")
-myGui.Add("Text", "x10 y170 cFFFFFF", "Alt 4:")
-myGui.Add("Edit", "x80 y170 vKey4Input w200 cFFFFFF")
-myGui.Add("Text", "x10 y205 cFFFFFF", "Alt 5:")
-myGui.Add("Edit", "x80 y205 vKey5Input w200 cFFFFFF")
+myGui.Add("Text", "x10 y60 cFFFFFF", "Alt 1:")
+myGui.Add("Text", "x80 y60 vKey1Input w200 c00DDFF", "")
+myGui.Add("Text", "x10 y90 cFFFFFF", "Alt 2:")
+myGui.Add("Text", "x80 y90 vKey2Input w200 c00DDFF", "")
+myGui.Add("Text", "x10 y120 cFFFFFF", "Alt 3:")
+myGui.Add("Text", "x80 y120 vKey3Input w200 c00DDFF", "")
+myGui.Add("Text", "x10 y150 cFFFFFF", "Alt 4:")
+myGui.Add("Text", "x80 y150 vKey4Input w200 c00DDFF", "")
+myGui.Add("Text", "x10 y180 cFFFFFF", "Alt 5:")
+myGui.Add("Text", "x80 y180 vKey5Input w200 c00DDFF", "")
 
-myGui.Add("Text", "x10 y245 cFFFF00 w280 h2 0x10")
+myGui.Add("Text", "x10 y215 c00DDFF w280 h2 0x10")
 
-myGui.Add("CheckBox", "x10 y255 vAddrAutoTab cFFFFFF", "Auto Tab")
+addrAutoTabCtrl := myGui.Add("CheckBox", "x10 y225 vAddrAutoTab cFFFFFF Checked", "Auto Tab")
+addrAutoTabCtrl.ToolTip := "Alt+Q fills: street, Tab, Tab, city, Tab, c, Tab, zip, Tab, phone"
 
-myGui.Add("Text", "x10 y280 cFFFFFF", "Alt Q:")
-myGui.Add("Text", "x80 y280 vAddrStreet w200 cFFFF00", "")
-myGui.Add("Text", "x10 y310 cFFFFFF", "Alt W:")
-myGui.Add("Text", "x80 y310 vAddrCity w200 cFFFF00", "")
-myGui.Add("Text", "x10 y340 cFFFFFF", "Alt E:")
-myGui.Add("Text", "x80 y340 vAddrZip w200 cFFFF00", "")
-myGui.Add("Text", "x10 y370 cFFFFFF", "Alt R:")
-myGui.Add("Text", "x80 y370 vAddrPhone w200 cFFFF00", "")
+myGui.Add("Text", "x10 y250 cFFFFFF", "Alt Q:")
+myGui.Add("Text", "x80 y250 vAddrStreet w200 c00DDFF", "")
+myGui.Add("Text", "x10 y280 cFFFFFF", "Alt W:")
+myGui.Add("Text", "x80 y280 vAddrCity w200 c00DDFF", "")
+myGui.Add("Text", "x10 y310 cFFFFFF", "Alt E:")
+myGui.Add("Text", "x80 y310 vAddrZip w200 c00DDFF", "")
+myGui.Add("Text", "x10 y340 cFFFFFF", "Alt R:")
+myGui.Add("Text", "x80 y340 vAddrPhone w200 c00DDFF", "")
 
-myGui.Add("CheckBox", "x10 y400 vAutoRefresh cFFFFFF", "Auto refresh after Alt R")
-
-myGui.Add("Button", "x80 y435 w200 h28", "New Address").OnEvent("Click", OnNewAddress)
+autoRefreshCtrl := myGui.Add("CheckBox", "x10 y370 vAutoRefresh cFFFFFF Checked", "Auto")
+autoRefreshCtrl.ToolTip := "Generate a new random address after pasting phone (Alt+R or Auto Tab)"
+myGui.Add("Button", "x80 y368 w200 h28", "Refresh").OnEvent("Click", OnNewAddress)
 
 myGui.OnEvent("Close", (*) => ExitApp())
 myGui.Show()
-LoadKeyInputs()
 GenerateRandomAddress()
-if FileExist("accounts.txt")
-    accounts := FileRead("accounts.txt")
 
 ; --- Slot paste hotkeys ---
 
 !1:: {
-    if PasteModeChecked() {
-        KeyWait "Alt"
-        saved := myGui.Submit(false)
-        if myGui["SlotAutoTab"].Value {
-            SendInput saved.Key1Input
-            Sleep 50
-            Send "{Tab}"
-            Sleep 50
-            SendInput saved.Key2Input
-            Sleep 50
-            Send "{Tab}"
-            Sleep 50
-            SendInput saved.Key3Input
-            Sleep 50
-            Send "{Tab}"
-            Sleep 50
-            SendInput saved.Key4Input
-        } else {
-            SendInput saved.Key1Input
-        }
+    KeyWait "Alt"
+    if myGui["SlotAutoTab"].Value {
+        SendInput myGui["Key1Input"].Value
+        Sleep 50
+        Send "{Tab}"
+        Sleep 50
+        SendInput myGui["Key2Input"].Value
+        Sleep 50
+        Send "{Tab}"
+        Sleep 50
+        SendInput myGui["Key3Input"].Value
+        Sleep 50
+        Send "{Tab}"
+        Sleep 50
+        SendInput myGui["Key4Input"].Value
+    } else {
+        SendInput myGui["Key1Input"].Value
     }
 }
 
 !2:: {
-    if PasteModeChecked() {
-        KeyWait "Alt"
-        saved := myGui.Submit(false)
-        SendInput saved.Key2Input
-    }
+    KeyWait "Alt"
+    SendInput myGui["Key2Input"].Value
 }
 
 !3:: {
-    if PasteModeChecked() {
-        KeyWait "Alt"
-        saved := myGui.Submit(false)
-        SendInput saved.Key3Input
-    }
+    KeyWait "Alt"
+    SendInput myGui["Key3Input"].Value
 }
 
 !4:: {
-    if PasteModeChecked() {
-        KeyWait "Alt"
-        saved := myGui.Submit(false)
-        SendInput saved.Key4Input
-    }
+    KeyWait "Alt"
+    SendInput myGui["Key4Input"].Value
 }
 
 !5:: {
-    if PasteModeChecked() {
-        KeyWait "Alt"
-        saved := myGui.Submit(false)
-        SendInput saved.Key5Input
-    }
+    KeyWait "Alt"
+    SendInput myGui["Key5Input"].Value
 }
 
 ; --- Slot copy hotkeys ---
@@ -277,118 +259,69 @@ if FileExist("accounts.txt")
 ; --- Quick copy 4 cells (Google Sheets) ---
 
 ^!`:: {
-    if PasteModeChecked() {
-        KeyWait "Alt"
-        Loop 4 {
-            Send "^c"
-            Sleep 10
-            clipContent := A_Clipboard
-            slot := A_Index
-            if (slot <= 5)
-                myGui["Key" slot "Input"].Value := clipContent
-            Send "{Right}"
-            Sleep 10
-        }
+    KeyWait "Alt"
+    Loop 4 {
+        Send "^c"
+        Sleep 10
+        clipContent := A_Clipboard
+        slot := A_Index
+        if (slot <= 5)
+            myGui["Key" slot "Input"].Value := clipContent
+        Send "{Right}"
+        Sleep 10
     }
 }
 
 ; --- Address hotkeys ---
 
 !q:: {
-    if PasteModeChecked() {
-        KeyWait "Alt"
-        if myGui["AddrAutoTab"].Value {
-            SendInput currentStreet
-            Sleep 50
-            Send "{Tab}"
-            Sleep 50
-            Send "{Tab}"
-            Sleep 50
-            SendInput currentCity
-            Sleep 50
-            Send "{Tab}"
-            Sleep 50
-            SendInput "c"
-            Sleep 50
-            Send "{Tab}"
-            Sleep 50
-            SendInput currentZip
-            Sleep 50
-            Send "{Tab}"
-            Sleep 50
-            SendInput currentPhone
-            if myGui["AutoRefresh"].Value
-                GenerateRandomAddress()
-        } else {
-            SendInput currentStreet
-        }
+    KeyWait "Alt"
+    if myGui["AddrAutoTab"].Value {
+        SendInput currentStreet
+        Sleep 50
+        Send "{Tab}"
+        Sleep 50
+        Send "{Tab}"
+        Sleep 50
+        SendInput currentCity
+        Sleep 50
+        Send "{Tab}"
+        Sleep 50
+        SendInput "c"
+        Sleep 50
+        Send "{Tab}"
+        Sleep 50
+        SendInput currentZip
+        Sleep 50
+        Send "{Tab}"
+        Sleep 50
+        SendInput currentPhone
+        if myGui["AutoRefresh"].Value
+            GenerateRandomAddress()
+    } else {
+        SendInput currentStreet
     }
 }
 
 !w:: {
-    if PasteModeChecked() {
-        KeyWait "Alt"
-        SendInput currentCity
-    }
+    KeyWait "Alt"
+    SendInput currentCity
 }
 
 !e:: {
-    if PasteModeChecked() {
-        KeyWait "Alt"
-        SendInput currentZip
-    }
+    KeyWait "Alt"
+    SendInput currentZip
 }
 
 !r:: {
-    if PasteModeChecked() {
-        KeyWait "Alt"
-        SendInput currentPhone
-        if myGui["AutoRefresh"].Value
-            GenerateRandomAddress()
-    }
+    KeyWait "Alt"
+    SendInput currentPhone
+    if myGui["AutoRefresh"].Value
+        GenerateRandomAddress()
 }
 
 !t:: {
-    if PasteModeChecked() {
-        GenerateRandomAddress()
-    }
-}
-
-; --- Account lookup ---
-
-!s:: {
-    if PasteModeChecked() {
-        KeyWait "Alt"
-        emailMatch := FetchWindowTitleEmail()
-
-        if !emailMatch {
-            MsgBox "No email found in window title"
-            return
-        }
-
-        Loop Parse, accounts, "`n"
-        {
-            account := StrSplit(A_LoopField, ",")
-            username := account[1]
-            username := StrReplace(username, "`n", "")
-            username := StrReplace(username, "`r", "")
-            pw := account[2]
-            pw := StrReplace(pw, "`n", "")
-            pw := StrReplace(pw, "`r", "")
-
-            if (username = emailMatch) {
-                A_Clipboard := ""
-                Send "^c"
-                if !ClipWait(2) {
-                    MsgBox "The attempt to copy text onto the clipboard failed."
-                    return
-                }
-                copyText := A_Clipboard
-                A_Clipboard := username . " " . pw . "`n" . copyText . "`n"
-                break
-            }
-        }
-    }
+    GenerateRandomAddress()
 }
 
 ; --- Functions ---
@@ -433,61 +366,73 @@ CopyToClipboardAndSetGuiControl(controlName) {
     }
 }
 
-FetchWindowTitleEmail() {
-    activeTitle := WinGetTitle("A")
-    if RegExMatch(activeTitle, "^[^\s|]+", &emailMatch)
-        return emailMatch[0]
-    return ""
-}
+helpGui := 0
 
-PasteModeChecked() {
-    return myGui["PasteMode"].Value
-}
-
-SaveInputs(*) {
-    saved := myGui.Submit(false)
-    if FileExist("key_inputs.txt") {
-        try FileDelete(A_ScriptDir "\key_inputs.txt")
-        catch {
-            MsgBox "Failed to delete key inputs file"
-            return
-        }
+ToggleHelp(*) {
+    global helpGui
+    if helpGui {
+        helpGui.Destroy()
+        helpGui := 0
+        return
     }
 
-    try FileAppend(
-        "Key 1: " saved.Key1Input "`nKey 2: " saved.Key2Input "`nKey 3: " saved.Key3Input "`nKey 4: " saved.Key4Input "`nKey 5: " saved.Key5Input "`n",
-        A_ScriptDir "\key_inputs.txt"
-    )
-    catch {
-        MsgBox "Failed to save key inputs to file"
+    helpGui := Gui("+AlwaysOnTop -MinimizeBox")
+    helpGui.BackColor := "282828"
+    helpGui.SetFont("s10 cWhite", "Verdana")
+
+    y := 10
+    helpGui.SetFont("s11 cWhite Bold")
+    helpGui.Add("Text", "x10 y" y " w260", "Slot Hotkeys")
+    helpGui.SetFont("s10 cWhite Norm")
+    y += 28
+    helpGui.Add("Text", "x10 y" y " w260 c00DDFF", "Alt+1..5           Paste slot content")
+    y += 22
+    helpGui.Add("Text", "x10 y" y " w260 c00DDFF", "Ctrl+Alt+1..5    Copy into slot")
+    y += 22
+    helpGui.Add("Text", "x10 y" y " w260 c00DDFF", "Ctrl+Alt+``        Copy sheet cells")
+    y += 22
+    helpGui.Add("Text", "x10 y" y " w260 c00DDFF", "Name | Card | Exp MMYY | CVV")
+    y += 28
+
+    helpGui.SetFont("s11 cWhite Bold")
+    helpGui.Add("Text", "x10 y" y " w260", "Address Hotkeys")
+    helpGui.SetFont("s10 cWhite Norm")
+    y += 28
+    helpGui.Add("Text", "x10 y" y " w260 c00DDFF", "Alt+Q    Paste street")
+    y += 22
+    helpGui.Add("Text", "x10 y" y " w260 c00DDFF", "Alt+W    Paste city")
+    y += 22
+    helpGui.Add("Text", "x10 y" y " w260 c00DDFF", "Alt+E    Paste zip")
+    y += 22
+    helpGui.Add("Text", "x10 y" y " w260 c00DDFF", "Alt+R    Paste phone")
+    y += 22
+    helpGui.Add("Text", "x10 y" y " w260 c00DDFF", "Alt+T    Refresh address")
+    y += 28
+
+    helpGui.SetFont("s11 cWhite Bold")
+    helpGui.Add("Text", "x10 y" y " w260", "Auto Tab Modes")
+    helpGui.SetFont("s10 cWhite Norm")
+    y += 28
+    helpGui.Add("Text", "x10 y" y " w260 c808080", "Slot: Alt+1 types slots 1-4")
+    y += 20
+    helpGui.Add("Text", "x10 y" y " w260 c808080", "  separated by Tab")
+    y += 26
+    helpGui.Add("Text", "x10 y" y " w260 c808080", "Addr: Alt+Q fills street,")
+    y += 20
+    helpGui.Add("Text", "x10 y" y " w260 c808080", "  Tab Tab city Tab c Tab")
+    y += 20
+    helpGui.Add("Text", "x10 y" y " w260 c808080", "  zip Tab phone")
+    helpGui.OnEvent("Close", CloseHelp)
+
+    myGui.GetPos(&mx, &my, &mw)
+    helpGui.Show("x" (mx + mw + 5) " y" my " w280")
+}
+
+CloseHelp(*) {
+    global helpGui
+    if helpGui {
+        helpGui.Destroy()
+        helpGui := 0
     }
 }
 
-LoadKeyInputs() {
-    if FileExist("key_inputs.txt") {
-        Key1Input := ""
-        Key2Input := ""
-        Key3Input := ""
-        Key4Input := ""
-        Key5Input := ""
-
-        Loop Read, "key_inputs.txt"
-        {
-            if InStr(A_LoopReadLine, "Key 1:")
-                Key1Input := SubStr(A_LoopReadLine, 8)
-            if InStr(A_LoopReadLine, "Key 2:")
-                Key2Input := SubStr(A_LoopReadLine, 8)
-            if InStr(A_LoopReadLine, "Key 3:")
-                Key3Input := SubStr(A_LoopReadLine, 8)
-            if InStr(A_LoopReadLine, "Key 4:")
-                Key4Input := SubStr(A_LoopReadLine, 8)
-            if InStr(A_LoopReadLine, "Key 5:")
-                Key5Input := SubStr(A_LoopReadLine, 8)
-        }
-        myGui["Key1Input"].Value := Key1Input
-        myGui["Key2Input"].Value := Key2Input
-        myGui["Key3Input"].Value := Key3Input
-        myGui["Key4Input"].Value := Key4Input
-        myGui["Key5Input"].Value := Key5Input
-    }
-}
