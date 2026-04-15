@@ -157,31 +157,35 @@ myGui.Add("CheckBox", "x80 y10 vPasteMode cFFFFFF Checked")
 
 myGui.Add("Button", "x200 y10 w80 h20", "Save").OnEvent("Click", SaveInputs)
 
-myGui.Add("Text", "x10 y40 cFFFFFF", "Alt 1:")
-myGui.Add("Edit", "x80 y40 vKey1Input w200 cFFFFFF")
-myGui.Add("Text", "x10 y75 cFFFFFF", "Alt 2:")
-myGui.Add("Edit", "x80 y75 vKey2Input w200 cFFFFFF")
-myGui.Add("Text", "x10 y110 cFFFFFF", "Alt 3:")
-myGui.Add("Edit", "x80 y110 vKey3Input w200 cFFFFFF")
-myGui.Add("Text", "x10 y145 cFFFFFF", "Alt 4:")
-myGui.Add("Edit", "x80 y145 vKey4Input w200 cFFFFFF")
-myGui.Add("Text", "x10 y180 cFFFFFF", "Alt 5:")
-myGui.Add("Edit", "x80 y180 vKey5Input w200 cFFFFFF")
+myGui.Add("CheckBox", "x10 y38 vSlotAutoTab cFFFFFF", "Auto Tab")
 
-myGui.Add("Text", "x10 y220 cFFFF00 w280 h2 0x10")
+myGui.Add("Text", "x10 y65 cFFFFFF", "Alt 1:")
+myGui.Add("Edit", "x80 y65 vKey1Input w200 cFFFFFF")
+myGui.Add("Text", "x10 y100 cFFFFFF", "Alt 2:")
+myGui.Add("Edit", "x80 y100 vKey2Input w200 cFFFFFF")
+myGui.Add("Text", "x10 y135 cFFFFFF", "Alt 3:")
+myGui.Add("Edit", "x80 y135 vKey3Input w200 cFFFFFF")
+myGui.Add("Text", "x10 y170 cFFFFFF", "Alt 4:")
+myGui.Add("Edit", "x80 y170 vKey4Input w200 cFFFFFF")
+myGui.Add("Text", "x10 y205 cFFFFFF", "Alt 5:")
+myGui.Add("Edit", "x80 y205 vKey5Input w200 cFFFFFF")
 
-myGui.Add("Text", "x10 y230 cFFFFFF", "Alt Q:")
-myGui.Add("Text", "x80 y230 vAddrStreet w200 cFFFF00", "")
-myGui.Add("Text", "x10 y260 cFFFFFF", "Alt W:")
-myGui.Add("Text", "x80 y260 vAddrCity w200 cFFFF00", "")
-myGui.Add("Text", "x10 y290 cFFFFFF", "Alt E:")
-myGui.Add("Text", "x80 y290 vAddrZip w200 cFFFF00", "")
-myGui.Add("Text", "x10 y320 cFFFFFF", "Alt R:")
-myGui.Add("Text", "x80 y320 vAddrPhone w200 cFFFF00", "")
+myGui.Add("Text", "x10 y245 cFFFF00 w280 h2 0x10")
 
-myGui.Add("CheckBox", "x10 y350 vAutoRefresh cFFFFFF", "Auto refresh after Alt R")
+myGui.Add("CheckBox", "x10 y255 vAddrAutoTab cFFFFFF", "Auto Tab")
 
-myGui.Add("Button", "x80 y385 w200 h28", "New Address").OnEvent("Click", OnNewAddress)
+myGui.Add("Text", "x10 y280 cFFFFFF", "Alt Q:")
+myGui.Add("Text", "x80 y280 vAddrStreet w200 cFFFF00", "")
+myGui.Add("Text", "x10 y310 cFFFFFF", "Alt W:")
+myGui.Add("Text", "x80 y310 vAddrCity w200 cFFFF00", "")
+myGui.Add("Text", "x10 y340 cFFFFFF", "Alt E:")
+myGui.Add("Text", "x80 y340 vAddrZip w200 cFFFF00", "")
+myGui.Add("Text", "x10 y370 cFFFFFF", "Alt R:")
+myGui.Add("Text", "x80 y370 vAddrPhone w200 cFFFF00", "")
+
+myGui.Add("CheckBox", "x10 y400 vAutoRefresh cFFFFFF", "Auto refresh after Alt R")
+
+myGui.Add("Button", "x80 y435 w200 h28", "New Address").OnEvent("Click", OnNewAddress)
 
 myGui.OnEvent("Close", (*) => ExitApp())
 myGui.Show()
@@ -196,7 +200,23 @@ if FileExist("accounts.txt")
     if PasteModeChecked() {
         KeyWait "Alt"
         saved := myGui.Submit(false)
-        SendInput saved.Key1Input
+        if myGui["SlotAutoTab"].Value {
+            SendInput saved.Key1Input
+            Sleep 50
+            Send "{Tab}"
+            Sleep 50
+            SendInput saved.Key2Input
+            Sleep 50
+            Send "{Tab}"
+            Sleep 50
+            SendInput saved.Key3Input
+            Sleep 50
+            Send "{Tab}"
+            Sleep 50
+            SendInput saved.Key4Input
+        } else {
+            SendInput saved.Key1Input
+        }
     }
 }
 
@@ -277,7 +297,31 @@ if FileExist("accounts.txt")
 !q:: {
     if PasteModeChecked() {
         KeyWait "Alt"
-        SendInput currentStreet
+        if myGui["AddrAutoTab"].Value {
+            SendInput currentStreet
+            Sleep 50
+            Send "{Tab}"
+            Sleep 50
+            Send "{Tab}"
+            Sleep 50
+            SendInput currentCity
+            Sleep 50
+            Send "{Tab}"
+            Sleep 50
+            SendInput "c"
+            Sleep 50
+            Send "{Tab}"
+            Sleep 50
+            SendInput currentZip
+            Sleep 50
+            Send "{Tab}"
+            Sleep 50
+            SendInput currentPhone
+            if myGui["AutoRefresh"].Value
+                GenerateRandomAddress()
+        } else {
+            SendInput currentStreet
+        }
     }
 }
 
